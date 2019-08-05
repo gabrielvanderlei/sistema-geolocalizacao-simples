@@ -10,17 +10,39 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="">
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.3.4/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.3.4/firebase-database.js"></script>
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#config-web-app -->
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAiTckOwpZFLvICrEwoUW3U7kEvWKTHXyM",
+        authDomain: "mapdeck.firebaseapp.com",
+        databaseURL: "https://mapdeck.firebaseio.com",
+        projectId: "mapdeck",
+        storageBucket: "",
+        messagingSenderId: "451111411334",
+        appId: "1:451111411334:web:f4fe6b4e7cf52413"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      var db = firebase.database();
+    </script>
 
     <script src='https://api.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.css' rel='stylesheet' />
   </head>
-  <body>
+  <body style="text-align: center;font-family: Arial;">
     <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
     <![endif]-->
 
     <!--Mapbox-->
-    <div id='map' style='top: 0; left: 0; position: absolute;width: 100%; height: 100%;'></div>
+    <div id='map' style='z-index: -1;top: 0; left: 0; position: fixed;width: 100%; height: 100%;'></div>
+    <div id="but" style="width: 300px;display:inline-block;padding: 5px;box-shadow:0 0 7px rgba(0,0,0,0.3);border-radius:3px;color:white;background: green;margin: 20px;" class="button">Adicionar meu local ao mapa</div>
     <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ2FicmllbHZhbmRlcmxlaSIsImEiOiJjanZkd3g1NnAxbDdlNGRubWpqdGdpdnpmIn0.jRzgWGuVBb_HWZ4xQUgIKQ';
 
@@ -34,31 +56,60 @@
         zoom: 12
       });
 
-      map.on('load', function () {
-        // Add a symbol layer.
-        map.addLayer({
-            "id": "symbols",
-            "type": "symbol",
-            "source": {
-            "type": "geojson",
-            "data": {
-              "type": "FeatureCollection",
-              "features": [
-                  {
-                    "type": "Feature",
-                    "properties": {},
-                    "geometry": {
-                      "type": "Point",
-                      "coordinates": [ longitude, latitude]
-                    }
+      var c = 0;
+
+      map.on('load', () => {
+
+        document.getElementById("but").onclick = () => {
+          db.ref("points").push({
+            longitude: longitude,
+            latitude: latitude
+          })
+        }
+
+        var features = []
+
+        db.ref("points").on("value", (snapshot) => {
+          
+          var total = snapshot.numChildren()
+          var c = 0
+
+          snapshot.forEach((snap) => {
+            
+            var dt = snap.val()
+            console.log(dt)
+
+            // Add a symbol layer.
+            features.push({
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry": {
+                          "type": "Point",
+                          "coordinates": [ dt.longitude, dt.latitude]
+                        }
+                      });
+            c++;
+
+            console.log([c, total])
+            if(c == total){
+              console.log(features)
+              map.addLayer({
+                  "id": String(c),
+                  "type": "symbol",
+                  "source": {
+                    "type": "geojson",
+                    "data": {
+                      "type": "FeatureCollection",
+                      "features": features
+                      }
+                  },
+                  "layout": {
+                  "icon-image": "rocket-15"
                   }
-                ]
-              }
-            },
-            "layout": {
-            "icon-image": "rocket-15"
+                });
             }
           });
+        })
       });
     })
 
