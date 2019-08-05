@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Mapa</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.2.0/mapbox-gl.css' rel='stylesheet' />
+  </head>
+  <body>
+    <!--[if lt IE 7]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <!--Mapbox-->
+    <div id='map' style='top: 0; left: 0; position: absolute;width: 100%; height: 100%;'></div>
+    <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2FicmllbHZhbmRlcmxlaSIsImEiOiJjanZkd3g1NnAxbDdlNGRubWpqdGdpdnpmIn0.jRzgWGuVBb_HWZ4xQUgIKQ';
+
+    navigator.geolocation.getCurrentPosition(({coords:{latitude, longitude}}) => {
+      console.log([ longitude, latitude])
+      
+      var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [ longitude, latitude],
+        zoom: 12
+      });
+
+      map.on('load', function () {
+        // Add a symbol layer.
+        map.addLayer({
+            "id": "symbols",
+            "type": "symbol",
+            "source": {
+            "type": "geojson",
+            "data": {
+              "type": "FeatureCollection",
+              "features": [
+                  {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": {
+                      "type": "Point",
+                      "coordinates": [ longitude, latitude]
+                    }
+                  }
+                ]
+              }
+            },
+            "layout": {
+            "icon-image": "rocket-15"
+            }
+          });
+      });
+    })
+
+    </script>
+    
+  </body>
+</html>
